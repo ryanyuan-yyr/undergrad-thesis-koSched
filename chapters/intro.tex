@@ -1,39 +1,23 @@
-% !TeX root = ../main.tex
-
 \chapter{简介}
 
-\section{一级节标题}
+当今社会，计算机技术得到了广泛的应用，而高性能计算技术在这其中占据了重要地位。GPU作为加速器在性能提升方面扮演了重要的角色。得益于其高计算性能和卓越的能量效率，GPU目前广泛用于科学和技术计算。
 
-\subsection{二级节标题}
+与CPU相比，GPU的主要区别在于：更高的并发性，更高的内存带宽以及有严格约束的执行模型。它们的使用范围涵盖了广泛的应用，从计算应用（如密集线性代数\cite{10.5555/1413370.1413402}、矩阵乘法\cite{10.1145/2063384.2063392}和优化\cite{6498575}）到内存密集型应用（如图形和集合算法\cite{Ashkiani_2017} \cite{10.1145/2560040} \cite{10.1007/978-3-662-53455-7_1}）。
 
-\subsubsection{三级节标题}
+为了充分利用GPU的计算能力，NVIDIA推出了CUDA，一种针对GPU的并行计算平台和编程模型。其中一个重要概念是内核(kernel)，指在GPU上执行数据并行函数的设备代码\cite{kernel-def}。CUDA程序通常由多个内核组成，内核由多个线程块(block)组成，块被分配到GPU的流处理器上运行。当调用或启动一个内核时，GPU会启动由大量线程组成的集合，称为网格(grid)，同时运行相同的设备代码，处理问题的不同部分。
 
-\paragraph{四级节标题}
+不同的应用程序在执行过程中需要不同的资源。如果硬件资源和程序的需求没有恰当地匹配，就会导致资源利用不足(resource underutilization)。许多工作从不同的角度研究了这个问题，包括功耗优化\cite{10.1145/3133560} \cite{10.1145/2611758} \cite{7152947}和资源利用\cite{10.1145/3093336.3037707} \cite{7967160}。这些研究表明，GPU的高度并行架构（包括执行单元、多处理器、内存子系统和其他资源）使我们有机会协同调度具有不同特征的计算内核。一个计算密集型的内核（例如线性代数计算）可以与一个内存密集型的内核（例如约减或模板计算）同时进行协同调度。在理想情况下，它们不会产生负面干扰，因为它们有不同的资源需求，可以将执行时间相等的两个应用程序的速度提高一倍。此外，像许多处理器一样，GPU的功耗不会随着负载的减少或增加而线性降低或增加\cite{10.1145/2636342} \cite{10.1007/s11227-016-1643-9}。因此，不充分利用GPU硬件资源也会导致功耗效率降低。
 
-\subparagraph{五级节标题}
+为了克服资源利用不足的问题，NVIDIA推出了并发内核执行技术(concurrent kernel execution)\cite{concurrent-kernel-execution}。虽然该技术的调度策略没有详细公布，但我们知道它是一种“剩余策略”（见\autoref{background}\autoref{nvidia-sched}），即，硬件资源将被分配给第一个内核，如果有未使用的资源，则分配给第二个内核，并对于随后的内核重复此方法。当内核较大时，这种调度策略使得不同内核难以并行执行，而单个内核整体无法实现GPU资源的真正共享。一个自然的问题是：我们能否将内核切片成小块，然后同时调度来自不同内核的切片，以提高GPU资源利用率？答案是肯定的。我们注意到，GPU内核（例如使用CUDA或OpenCL编写的内核）符合SPMD（Single Program Multiple Data）执行模型。在这样的数据并行执行中，内核通常可以分成多个子内核，每个子内核由多个block组成。子内核是一个占用资源较低的内核，并可以与其他内核的子内核同时执行。因此，GPU并发内核调度问题转换为子内核调度问题。然而，使用分割技术后，我们需要解决的问题有：什么样的子内核大小适合？如何以透明的方式执行子内核？子内核的最小粒度是一个block，如果提交太多这样的小子内核进行执行会导致显著的运行时开销。另一个极端是将整个内核作为最大的子内核粒度，这会退化为未分割执行的情形。在实践中，若选择不恰当的子内核大小，内核分割带来的性能提升十分有限，甚至会造成性能损失。为找到合适的子内核配置，开发人员需要进行大量的实验，这是一项非常耗时的工作。
 
-本模板 \pkg{ustcthesis} 是中国科学技术大学本科生和研究生学位论文的 \LaTeX{}
-模板， 按照《\href{https://gradschool.ustc.edu.cn/static/upload/article/picture/ce3b02e5f0274c90b9331ef50ae1ac26.pdf}
-{中国科学技术大学研究生学位论文撰写手册}》（以下简称《撰写手册》）和
-《\href{https://www.teach.ustc.edu.cn/?attachment_id=13867}
-{中国科学技术大学本科毕业论文（设计）格式}》的要求编写。
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua.
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-fugiat nulla pariatur.
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-deserunt mollit anim id est laborum.
+为了解决这个问题，本项目提出了\emph{ko-Sched}(\underline{K}ernel C\underline{o-Sched}uler)，该工具旨在帮助开发人员寻找合适的子内核配置，以提高CUDA程序的整体性能。具体来说，我们计划使用类比梯度下降的搜索算法为每个内核找到最优的子内核配置。搜索过程涉及到评估在一些分割参数下程序的性能，我们将测量内核的一部分块的执行时间，从而以较低开销估算运行整个内核的执行时间。开发人员在编写需要联合调度的CUDA程序时，可以使用ko-Sched分析最佳的子内核大小，避免手动进行实验。我们的实验结果表明，使用ko-Sched可以提高CUDA程序的性能，而且在大多数情况下，ko-Sched的性能提升是显著的。
 
 
+Ko-Sched有以下贡献：
+\begin{enumerate*}[label=\roman*),itemjoin={\quad}]
+    \item ko-Sched提供了一个方便开发人员编写可分割内核的框架
+    \item ko-Sched使用搜索算法为每个内核找到最优的子内核配置，提高了CUDA程序的性能
+\end{enumerate*}
+。
 
-\section{脚注}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua.
-\footnote{Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-  nisi ut aliquip ex ea commodo consequat.
-  Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore
-  eu fugiat nulla pariatur.}
+本文将首先介绍CUDA编程的背景及相关工作，然后详细描述ko-Sched的设计和实现细节，接着给出实验结果和分析，最后总结全文。如无特别说明，本文中的实验均在NVIDIA GeForce RTX 2080Ti上进行。\autoref{evaluation}\autoref{exp-env}将详细介绍此设备及实验中用到的其他GPU硬件。

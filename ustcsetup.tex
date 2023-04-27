@@ -1,20 +1,19 @@
 % !TeX root = ./main.tex
 
 \ustcsetup{
-  title              = {中国科学技术大学\\学位论文模板示例文档 v\ustcthesisversion},
-  title*             = {An example of thesis template for University of Science
-                        and Technology of China v\ustcthesisversion},
-  author             = {李泽平},
-  author*            = {Li Zeping},
-  speciality         = {数学与应用数学},
-  speciality*        = {Mathematics and Applied Mathematics},
-  supervisor         = {XXX~教授, XXX~教授},
-  supervisor*        = {Prof. XXX, Prof. XXX},
+  title              = {\emph{Ko-Sched}：CUDA内核分割离线优化工具},
+  title*             = {Maximizing GPU Performance with \emph{ko-Sched}: An Offline Tuner for CUDA Kernel Slicing},
+  author             = {袁玉润},
+  author*            = {Yuan, Yurun},
+  speciality         = {计算机科学与技术},
+  speciality*        = {Computer Science and Technology},
+  supervisor         = {张燕咏教授，张昱教授},
+  supervisor*        = {Prof. Yanyong Zhang, Prof. Yu Zhang},
   % date               = {2017-05-01},  % 默认为今日
   % professional-type  = {专业学位类型},
   % professional-type* = {Professional degree type},
-  % department         = {数学科学学院},  % 院系，本科生需要填写
-  % student-id         = {PB11001000},  % 学号，本科生需要填写
+  department         = {计算机科学与技术学院},  % 院系，本科生需要填写
+  student-id         = {PB19111692},  % 学号，本科生需要填写
   % secret-level       = {秘密},     % 绝密|机密|秘密|控阅，注释本行则公开
   % secret-level*      = {Secret},  % Top secret | Highly secret | Secret
   % secret-year        = {10},      % 保密/控阅期限
@@ -48,8 +47,8 @@
 
 % 参考文献使用 BibTeX + natbib 宏包
 % 顺序编码制
-\usepackage[sort]{natbib}
-\bibliographystyle{ustcthesis-numerical}
+% \usepackage[sort]{natbib}
+% \bibliographystyle{ustcthesis-numerical}
 
 % 著者-出版年制
 % \usepackage{natbib}
@@ -63,9 +62,9 @@
 % \usepackage[style=ustcthesis-numeric]{biblatex}
 % \usepackage[bibstyle=ustcthesis-numeric,citestyle=ustcthesis-inline]{biblatex}
 % \usepackage[style=ustcthesis-authoryear]{biblatex}
-% \usepackage[style=ustcthesis-bachelor]{biblatex}
+\usepackage[style=ustcthesis-bachelor]{biblatex}
 % 声明 BibLaTeX 的数据库
-% \addbibresource{bib/ustc.bib}
+\addbibresource{bib/ustc.bib}
 
 % 配置图片的默认目录
 \graphicspath{{figures/}}
@@ -92,3 +91,31 @@
 
 % hyperref 宏包在最后调用
 \usepackage{hyperref}
+
+\usepackage{xcolor}
+\usepackage[inline]{enumitem}
+\usepackage{listings}
+\usepackage{fontspec}
+\setmonofont{Consolas}
+
+\lstset{
+  basicstyle=\small\ttfamily\color{black},
+  stringstyle=\color{red},
+  keywordstyle=\color{blue}\mdseries,
+  commentstyle=\color{green!50!black},
+  showstringspaces=false,
+  numbers=left,
+}
+
+\usepackage{tabularx}
+\usepackage{tabularray}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\SetKwFor{Loop}{Loop}{}{EndLoop}
+
+\newcommand{\lstnumberautorefname}{行}
+\renewcommand{\algorithmcflinename}{行}
+
+\widowpenalty=10000
+\clubpenalty=10000

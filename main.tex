@@ -2,7 +2,7 @@
 % !TeX program = xelatex
 % !TeX spellcheck = en_US
 
-\documentclass[degree=doctor]{ustcthesis}
+\documentclass[degree=bachelor, degree-type=academic, language=chinese]{ustcthesis}
 % degree      = doctor | master | bachelor
 % degree-type = academic | professional
 % language    = chinese | english
@@ -22,22 +22,24 @@
 \tableofcontents
 % \listoffigures
 % \listoftables
-\input{chapters/notation.tex}
+% \input{chapters/notation.tex}
 
 \mainmatter
 \input{chapters/intro.tex}
-\input{chapters/floats.tex}
-\input{chapters/math.tex}
-\input{chapters/citations.tex}
+\input{chapters/background.tex}
+\input{chapters/motivation.tex}
+\input{chapters/design-implementation.tex}
+\input{chapters/evaluation.tex}
+\input{chapters/conclusion.tex}
 
-\bibliography{bib/ustc}  % 参考文献使用 BibTeX 编译
-% \printbibliography       % 参考文献使用 BibLaTeX 编译
+% \bibliography{bib/ustc}  % 参考文献使用 BibTeX 编译
+\printbibliography       % 参考文献使用 BibLaTeX 编译
 
 \appendix
-\input{chapters/complementary.tex}
+% \input{chapters/complementary.tex}
 
 \backmatter
 \input{chapters/acknowledgements.tex}
-\input{chapters/publications.tex}
+% \input{chapters/publications.tex}
 
 \end{document}
