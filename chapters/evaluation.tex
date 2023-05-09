@@ -20,7 +20,7 @@
         \emph{\#reg / block}        & 65536                                                & 65536                                         & 65536                                         & 65536                                         \\
         \emph{Shared mem / MP}      & $96$ KB                                              & $64$ KB                                       & $100$ KB                                      & $100$ KB                                      \\
         \emph{Global Memory}        & $1.95$ GB                                            & $10.76$ GB                                    & $10$ GB                                       & $23.69$ GB                                    \\
-        \emph{CPU}                  & Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz   2.30 GHz & Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz & Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz & Intel(R) Xeon(R) Platinum 8350C CPU @ 2.60GHz \\
+        \emph{Host CPU}             & Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz   2.30 GHz & Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz & Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz & Intel(R) Xeon(R) Platinum 8350C CPU @ 2.60GHz \\
         \hline
     \end{tblr}
     \caption{实验涉及的GPU硬件}
@@ -31,43 +31,43 @@
 
 \begin{description}
     \item[\texttt{matrix\_mul} (\texttt{mm})] 矩阵乘法内核，选取自CUDA Samples。将矩阵分块为$\texttt{BLOCK\_SIZE}\times\texttt{BLOCK\_SIZE}$大小的子矩阵，每个子矩阵从global memory加载至shared memory后进行子矩阵乘法运算，最后复制回global memory。
-    \item[\texttt{vec\_add} (\texttt{va})] 矢量加法内核，选取自CUDA Samples。以loop unrolling的方式实现，每个thread对矢量的连续若干个元素进行运算。
+    \item[\texttt{vec\_add} (\texttt{va})] 矢量加法内核，选取自CUDA Samples。实现loop unrolling优化，每个thread负责矢量的连续若干个元素的运算。
     \item[\texttt{matrix\_transpose} (\texttt{mt})] 矩阵转置内核，选取自CUDA Samples。以tiling的方式实现，每个thread负责若干个元素的复制。
     \item[\texttt{sqrt\_pow} (\texttt{sp})] 一个运算密集型内核，选取自cCUDA\cite{8853389}的实现。每个线程进行大量的平方根和指数运算。
 \end{description}
 
 \section{Ko-Sched实现的性能提升}
 
-本节将展示ko-Sched框架带来的性能提升。我们将对\texttt{mm}、\texttt{va}、\texttt{mt}和\texttt{sp}这4个内核间的组合进行测试，分别使用ko-Sched框架的可分割版本和未分割的原始版本（作为baseline），比较两者的性能。对于原始版本，两个内核将在同一CPU线程的2个stream分别启动。对于可分割版本，我们将使用ko-Sched框架将两个内核分割为若干个子内核，同一内核的子内核在一个stream中启动。
+本节将展示ko-Sched框架带来的性能提升。我们将对\texttt{mm}、\texttt{va}、\texttt{mt}和\texttt{sp}这4个内核间的组合进行测试，分别运行使用ko-Sched框架的可分割版本和作为baseline的未分割原始版本，比较两者的性能。对于原始版本，两个内核将在同一CPU线程的2个stream分别启动。对于可分割版本，我们将使用ko-Sched框架将两个内核分割为若干个子内核，同一内核的子内核在一个stream中启动。
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{evaluation/perf-eval-diff-dev.pdf}
-    \caption{Normalized performance of ko-Sched on different GPUs。注意y轴的范围从0.7开始。}
+    \caption{在不同GPU上ko-Sched相对于未分割版本的性能。注意y轴的范围从0.7开始。}
     \label{perf-eval-diff-dev}
 \end{figure}
 
-\autoref{perf-eval-diff-dev}展示了使用ko-Sched计算得的参数进行kernel分割所得到的性能提升。图中展示了各测试程序组合在不同GPU硬件下相对于baseline的性能。可以看到，ko-Sched框架在绝大部分情形下带来了性能提升，平均提升达到$12.5\%$，在部分组合下甚至能达到$30\%$。这是因为ko-Sched框架能够将两个内核的计算任务同时派发给设备，提高GPU硬件的利用率。此外，我们还可以看到，ko-Sched框架在不同的GPU硬件上均能带来性能提升，这说明ko-Sched框架的算法对GPU架构具有通用性。
+\autoref{perf-eval-diff-dev}展示了使用ko-Sched计算得的参数进行kernel分割所得到的性能提升。图中展示了各测试程序组合在不同GPU硬件下相对于baseline的性能。可以看到，ko-Sched框架在绝大部分情形下带来了性能提升，平均提升达到$12.5\%$，在部分组合下甚至能达到$30\%$。这是因为ko-Sched框架能够将两个内核的计算任务同时派发给设备，提高GPU硬件的利用率。此外，我们还可以看到ko-Sched框架在不同的GPU硬件上均能带来性能提升，这说明ko-Sched框架的算法对GPU架构具有通用性。
 
-\texttt{va}与\texttt{mt}的组合在所有GPU硬件上均未表现出明显的性能提升。这是因为\texttt{va}与\texttt{mt}均属于内存密集型应用，二者瓶颈均在内存操作上，因此将二者并行执行并不能提高性能。cCUDA\cite{8853389}提出了\emph{Kernel Mix Intensity}(KMI)指标用于将内核分为计算密集型和内存密集型。他们的工作同样指出\texttt{va}与\texttt{mt}同属于内存密集型应用。在他们的实验中，\texttt{va}与\texttt{mt}的组合也未表现出明显的性能提升。\texttt{va}与\texttt{sp}的组合在所有GPU硬件上均表现出较明显的性能提升。这是因为\texttt{va}属于内存密集型应用，\texttt{sp}属于计算密集型应用，二者的瓶颈不同，内存指令与计算指令可以互相隐藏，从而提高性能。这两个例子说明为实现性能提升需谨慎选择并行的内核组合。
+\texttt{va}与\texttt{mt}的组合在所有GPU硬件上均未表现出明显的性能提升。这是因为\texttt{va}与\texttt{mt}均属于内存密集型应用，二者瓶颈均在内存操作上，因此将二者并行执行并不能提高性能。cCUDA\cite{8853389}提出了\emph{Kernel Mix Intensity}(KMI)指标用于将内核分为计算密集型和内存密集型。他们的工作同样指出\texttt{va}与\texttt{mt}同属于内存密集型应用。在他们的实验中，\texttt{va}与\texttt{mt}的组合也未表现出明显的性能提升。\texttt{va}与\texttt{sp}的组合在所有GPU硬件上均表现出较明显的性能提升。这是因为\texttt{va}属于内存密集型应用，\texttt{sp}属于计算密集型应用，二者的瓶颈不同，内存指令执行与计算指令执行可以互相隐藏，从而提高性能。这两个例子说明为实现性能提升需谨慎选择并行的内核组合。
 
 在部分测试程序的组合中，不同GPU硬件的表现有较大差异。例如，在\texttt{sp}和\texttt{mm}的组合中，MX250几乎未表现出性能提升，而其余GPU的性能提升达到了近30\%。这种差异并非仅仅由GPU性能高低导致。例如，在\texttt{sp}和\texttt{mt}的组合中，综合性能最佳的RTX 3090表现出的性能提升最低。这种差异源于同一测试程序在不同GPU上表现出的特征不同，故为达到最佳性能需要针对不同GPU进行参数计算。Ko-Sched的算法能够根据不同GPU的特征计算出不同的参数，达到较好的效果。
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{evaluation/perf-eval-compared-to-opt.pdf}
-    \caption{Performance evaluation of ko-Sched on RTX2080Ti compared to optimal scheduling}
+    \caption{ko-Sched相对于最佳分割参数下的性能。}
     \label{perf-eval-cmp-opt}
 \end{figure}
 
-为了说明ko-Sched算法所得结果的最优性，我们在RTX 2080Ti硬件上测试了大量的参数组合\footnote{我们测试了所有满足子内核数目大于3且子内核大小至少为\autoref{eq:searching:stepsize}所确定数值的参数组合}，找到了其中性能最佳的参数组合。我们将ko-Sched算法所得结果与这个参数下的性能进行比较，结果如\autoref{perf-eval-cmp-opt}所示。可以看到，ko-Sched算法所得结果的性能与最优结果的性能相差不大，平均达到了最佳性能的$93.14\%$。这说明ko-Sched算法所得结果的最优性。
+为了说明ko-Sched算法所得结果的最优性，我们在RTX 2080Ti硬件上测试了大量的分割参数组合下的程序性能\footnote{我们测试了所有满足子内核数目大于3且子内核大小至少为\autoref{eq:searching:stepsize}所确定数值的参数组合}，找到了其中性能最佳的参数组合。我们将ko-Sched算法所得结果与这个参数下的性能进行比较，结果如\autoref{perf-eval-cmp-opt}所示。可以看到，ko-Sched算法所得结果的性能与最优结果的性能相差不大，平均达到了最佳性能的$93.14\%$。这说明ko-Sched算法所得结果的最优性。
 
 \section{执行时间估算的效果}\label{exp-est}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{evaluation/perf-eval-compared-to-nonsampling.pdf}
-    \caption{Performance evaluation of ko-Sched compared to ko-Sched'。注意y轴的范围从0.7开始。}
+    \caption{ko-Sched相对于ko-Sched'的性能。注意y轴的范围从0.7开始。}
     \label{perf-eval-compared-to-nonsampling}
 \end{figure}
 
