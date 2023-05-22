@@ -19,17 +19,17 @@ CUDA是英伟达公司开发的通用并行计算平台和编程模型，它可�
 
 除了warp外，CUDA编程还引入了其他层次的并行结构。一个kernel通常由单个grid构成，grid由若干block构成，而block包括一系列可以并行的warp。GPU设备由若干\emph{流处理器}（SM）组成，每个流处理器内的warp调度模块负责将warp分配给可用的硬件资源。当kernel从调度列表中被派发时，block调度模块将其中每个block分配到一个SM中，直至所有block均被分配或没有足够的可用硬件资源。Grid和block均可组织为1维、2维或3维。当block被分配到硬件时，其维度信息将被消除而仅视为一系列warp。
 
-\begin{lstlisting}[language=C++, label=code:naivehostcudacode, caption=矩阵转置程序的主机代码, float, firstnumber=1, escapeinside={(*}{*)}]
+\begin{lstlisting}[name=naivecudacode, language=C++, label=code:naivehostcudacode, caption=矩阵转置程序的主机代码, float, escapeinside={(*}{*)}, xleftmargin=0.07\textwidth,]
 void cpuThread() {
     // data init and allocation
     const size_t msize = W_MATRIX*H_MATRIX*sizeof(float);
     float *h_iData = (float*)malloc(msize); (*\label{code:naivehostcudacode:allocbeg}*)
     float *h_oData = (float*)malloc(msize);
     float *d_iData = cudaMalloc(&d_iData,msize);
-    float *d_oData = cudaMalloc(&d_oData,msize); (*\label{code:naivehostcudacode:allocend}*)
+    float *d_oData = cudaMalloc(&d_oData,msize);(*\label{code:naivehostcudacode:allocend}*)
 
     fillInputData(h_iData, ...); (*\label{code:naivehostcudacode:initdata}*)
-    dim3 dimGrid(W_MATRIX/TILE_DIM, H_MATRIX/TILE_DIM, 1); (*\label{code:naivehostcudacode:configbeg}*)
+    dim3 dimGrid(W_MATRIX/TILE_DIM,H_MATRIX/TILE_DIM,1);(*\label{code:naivehostcudacode:configbeg}*)
     dim3 dimBlock(TILE_DIM, BLOCK_ROWS, 1); (*\label{code:naivehostcudacode:configend}*)
 
     // actual command submission
@@ -41,13 +41,13 @@ void cpuThread() {
 }
 \end{lstlisting}
 
-\begin{lstlisting}[language=C++, label=code:naivedevicecudacode, caption=矩阵转置程序的设备代码, float, firstnumber=1, escapeinside={(*}{*)}]
+\begin{lstlisting}[name=naivecudacode, language=C++, label=code:naivedevicecudacode, caption=矩阵转置程序的设备代码, float, escapeinside={(*}{*)}, xleftmargin=0.07\textwidth,]
 __global__ void transpose(float *odata, const float *idata){
     int x = blockIdx.x * TILE_DIM + threadIdx.x; (*\label{code:naivedevicecudacode:idxbeg}*)
     int y = blockIdx.y * TILE_DIM + threadIdx.y; (*\label{code:naivedevicecudacode:idxend}*)
     int width = gridDim.x * TILE_DIM;
     for (int j = 0; j < TILE_DIM; j += BLOCK_ROWS) (*\label{code:naivedevicecudacode:loopbeg}*)
-        odata[x * width + (y + j)] = idata[(y + j) * width + x]; (*\label{code:naivedevicecudacode:loopend}*)
+        odata[x*width+(y+j)] = idata[(y+j)*width+x]; (*\label{code:naivedevicecudacode:loopend}*)
 }
 \end{lstlisting}
 

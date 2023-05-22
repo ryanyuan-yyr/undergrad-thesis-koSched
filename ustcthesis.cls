@@ -1798,7 +1798,7 @@
     \newcommand\ustc@thesis@name{硕士学位论文}
     \newcommand\ustc@thesis@name@en{A dissertation for master's degree}
   \else
-    \newcommand\ustc@thesis@name{学士学位论文}
+    \newcommand\ustc@thesis@name{本科毕业论文}
     \newcommand\ustc@thesis@name@en{A dissertation for bachelor's degree}
   \fi
 \fi
@@ -1965,73 +1965,135 @@
 \newbox\ustc@title@box
 
 % 本科生的封面
+% \newcommand\ustc@title@page@bachelor{%
+%   \begin{titlepage}%
+%     \ustc@pdfbookmark{Title page}%
+%     \centering
+%     \vspace*{0.8cm}%
+%     \includegraphics{figures/ustc-title-page-heading.pdf}%
+%     \vskip 4.3cm%
+%     \begingroup
+%       \bfseries\fontsize{15bp}{16bp}\selectfont
+%       \setlength\tabcolsep{\z@}%
+%       \setlength\arrayrulewidth{1.5pt}%
+%       \begin{tabular}{lp{140bp}lp{140bp}}%
+%         题\quad 目 &
+%           \multicolumn{3}{c}{%
+%             \multirow[t]{2}{325bp}{%
+%               \savebox\ustc@title@box{%
+%                 \parbox[t]{325bp}{%
+%                   \centering\fontsize{15bp}{40bp}\selectfont
+%                   \ustc@title
+%                 }%
+%               }%
+%               \dp\ustc@title@box=0pt\relax
+%               \usebox\ustc@title@box
+%             }%
+%           } \\
+%         \cline{2-4}%
+%         \noalign{\vskip 24bp}%
+%         & & & \\
+%         \cline{2-4}%
+%         \noalign{\vskip 24bp}%
+%         英\quad 文 &
+%           \multicolumn{3}{c}{%
+%             \multirow[t]{3}{325bp}{%
+%               \savebox\ustc@title@box{%
+%                 \parbox[t]{325bp}{%
+%                   \centering\fontsize{15bp}{40bp}\selectfont
+%                   \ustc@title@en
+%                 }%
+%               }%
+%               \dp\ustc@title@box=0pt\relax
+%               \usebox\ustc@title@box
+%             }%
+%           } \\
+%         \cline{2-4}%
+%         \noalign{\vskip 24bp}%
+%         题\quad 目 & & & \\
+%         \cline{2-4}%
+%         \noalign{\vskip 24bp}%
+%         & & & \\
+%         \cline{2-4}%
+%         \noalign{\vskip 24bp}%
+%         院\quad 系 & \multicolumn{3}{c}{\ustc@department} \\
+%         \cline{2-4}%
+%         \noalign{\vskip 24bp}%
+%         姓\quad 名 & \multicolumn{1}{c}{\ustc@author} &
+%         学\quad 号 & \multicolumn{1}{c}{\ustc@student@id} \\
+%         \cline{2-2}%
+%         \cline{4-4}%
+%         \noalign{\vskip 24bp}%
+%         导\quad 师 & \multicolumn{3}{c}{\ustc@supervisor@names} \\
+%         \cline{2-4}%
+%         \noalign{\vskip 24bp}%
+%         日\quad 期 & \multicolumn{3}{c}{\ustc@date@zh@small} \\
+%         \cline{2-4}%
+%       \end{tabular}%
+%     \endgroup
+%   \end{titlepage}%
+% }
 \newcommand\ustc@title@page@bachelor{%
+  \ustcsetup{language=chinese}%
   \begin{titlepage}%
-    \ustc@pdfbookmark{Title page}%
+    \ustc@pdfbookmark{封面}%
     \centering
-    \vspace*{0.8cm}%
-    \includegraphics{figures/ustc-title-page-heading.pdf}%
-    \vskip 4.3cm%
-    \begingroup
-      \bfseries\fontsize{15bp}{16bp}\selectfont
-      \setlength\tabcolsep{\z@}%
-      \setlength\arrayrulewidth{1.5pt}%
-      \begin{tabular}{lp{140bp}lp{140bp}}%
-        题\quad 目 &
-          \multicolumn{3}{c}{%
-            \multirow[t]{2}{325bp}{%
-              \savebox\ustc@title@box{%
-                \parbox[t]{325bp}{%
-                  \centering\fontsize{15bp}{40bp}\selectfont
-                  \ustc@title
-                }%
-              }%
-              \dp\ustc@title@box=0pt\relax
-              \usebox\ustc@title@box
-            }%
-          } \\
-        \cline{2-4}%
-        \noalign{\vskip 24bp}%
-        & & & \\
-        \cline{2-4}%
-        \noalign{\vskip 24bp}%
-        英\quad 文 &
-          \multicolumn{3}{c}{%
-            \multirow[t]{3}{325bp}{%
-              \savebox\ustc@title@box{%
-                \parbox[t]{325bp}{%
-                  \centering\fontsize{15bp}{40bp}\selectfont
-                  \ustc@title@en
-                }%
-              }%
-              \dp\ustc@title@box=0pt\relax
-              \usebox\ustc@title@box
-            }%
-          } \\
-        \cline{2-4}%
-        \noalign{\vskip 24bp}%
-        题\quad 目 & & & \\
-        \cline{2-4}%
-        \noalign{\vskip 24bp}%
-        & & & \\
-        \cline{2-4}%
-        \noalign{\vskip 24bp}%
-        院\quad 系 & \multicolumn{3}{c}{\ustc@department} \\
-        \cline{2-4}%
-        \noalign{\vskip 24bp}%
-        姓\quad 名 & \multicolumn{1}{c}{\ustc@author} &
-        学\quad 号 & \multicolumn{1}{c}{\ustc@student@id} \\
-        \cline{2-2}%
-        \cline{4-4}%
-        \noalign{\vskip 24bp}%
-        导\quad 师 & \multicolumn{3}{c}{\ustc@supervisor@names} \\
-        \cline{2-4}%
-        \noalign{\vskip 24bp}%
-        日\quad 期 & \multicolumn{3}{c}{\ustc@date@zh@small} \\
-        \cline{2-4}%
-      \end{tabular}%
-    \endgroup
+    \parbox[t][0.6cm][t]{\textwidth}{%
+      \raggedleft\fangsong\fontsize{14bp}{14bp}\selectfont
+      \null\ustc@secret@level\par}\par
+    \vskip 0.5cm%
+    \includegraphics[height=1.3cm]{figures/ustc-name.pdf}\par
+    \vskip 0.6cm%
+      {\sffamily\fontsize{56bp}{56bp}\selectfont
+        \ustc@thesis@name\par}%
+    \ifustc@degree@type@academic
+      \vskip 2.0cm%
+    \else
+      \vskip 0.8cm%
+      \begingroup
+      \fontsize{26bp}{26bp}\selectfont
+      \ifx\ustc@professional@type\@empty
+        \null
+      \else
+        \lishu （\ustc@professional@type ）%
+      \fi
+      \par
+      \endgroup
+      \vskip 1.0cm%
+    \fi
+    \ifustc@badge@color@blue
+      \textcolor{ustcblue}{%
+        \includegraphics[height=4.1cm]{figures/ustc-badge.pdf}}%
+    \else
+      \includegraphics[height=4.1cm]{figures/ustc-badge.pdf}%
+    \fi\par
+    \vskip 0.9cm%
+    \parbox[t][3.5cm][c]{\textwidth}{%
+      \centering\sffamily\bfseries\fontsize{26bp}{50bp}\selectfont
+      \ustc@title\par}\par
+    \vskip 0.6cm%
+      {\fontsize{16bp}{31bp}\selectfont
+        \begin{tabular}{@{}l@{\hspace{\ccwd}}c@{}}%
+          \textsf{作者姓名：}              & \ustc@author           \\
+          \cline{2-2}%
+          \textsf{学\makebox[2em]{}号：} & \ustc@student@id       \\
+          \cline{2-2}%
+          \textsf{专\makebox[2em]{}业：} & \ustc@speciality       \\
+          \cline{2-2}%
+          \ifx\ustc@advisor\@empty
+          \textsf{导师姓名：}              & \ustc@supervisor@names \\
+            \cline{2-2}%
+          \else
+          \textsf{校内导师：}              & \ustc@supervisor@names \\
+            \cline{2-2}%
+          \textsf{企业导师：}              & \ustc@advisor@names    \\
+            \cline{2-2}%
+          \fi
+          \textsf{完成时间：}              & \ustc@date@zh@big      \\
+          \cline{2-2}%
+        \end{tabular}\par}%
   \end{titlepage}%
+  \ustc@reset@main@language
 }
 
 % 重新定义 \cs{maketitle}，调用 \cs{ustc@makezhtitle}, \cs{ustc@makeentitle}

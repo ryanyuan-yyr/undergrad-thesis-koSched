@@ -14,7 +14,7 @@
 
 \section{尺寸可调整的子内核}
 
-\begin{lstlisting}[language=C++, label=code:koschedcode, caption=Resizable kernel using ko-sched for matrix transpose, float, firstnumber=1, escapeinside={(*}{*)}]
+\begin{lstlisting}[language=C++, label=code:koschedcode, caption=Resizable kernel using ko-sched for matrix transpose, float, escapeinside={(*}{*)}, xleftmargin=0.07\textwidth,]
 KernelSetting pre_process() { (*\label{code:koschedcode:preprocessbeg}*)
     // data init and allocation
     const size_t msize{..};
@@ -29,26 +29,24 @@ KernelSetting pre_process() { (*\label{code:koschedcode:preprocessbeg}*)
     }; (*\label{code:koschedcode:kernelsettingend}*)
 }(*\label{code:koschedcode:preprocessend}*)
 
-__global__ void transpose(KernelArgs args, dim3 blockIdx) { (*\label{code:koschedcode:kernelbeg}*)
-    float *odata = args.odata; float *idata = args.idata;
-
+__global__ void transpose(KernelArgs args, dim3 blockIdx){(*\label{code:koschedcode:kernelbeg}*)
+    float *odata = args.odata, *idata = args.idata;
     int x = blockIdx.x * TILE_DIM + threadIdx.x;
     int y = blockIdx.y * TILE_DIM + threadIdx.y;
     int width = gridDim.x * TILE_DIM;
     for (int j = 0; j < TILE_DIM; j += BLOCK_ROWS)
-        odata[x * width + (y + j)] = idata[(y + j) * width + x];
+        odata[x*width+(y+j)] = idata[(y+j)*width+x];
 }
 EXECUTE(transpose); (*\label{code:koschedcode:kernelend}*)
 
 void post_process(Context context) { (*\label{code:koschedcode:postprocessbeg}*)
-    cudaMemcpy(context.h_oData, context.d_oData, 
-        context.msize, cudaMemcpyDeviceToHost);
+    cudaMemcpy(context.h_oData, context.d_oData, context.msize, cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
     // data post-processing
 } (*\label{code:koschedcode:postprocessend}*)
 \end{lstlisting}
 
-为了能分析不同分割配置下的程序性能，CUDA开发人员需要编写可被灵活分割的内核。Ko-Sched将一个CUDA程序分为\texttt{pre\_process}, \texttt{kernel\_execution}和\texttt{post\_process} 3个部分。\texttt{pre\_process}包括启动kernel前的所有处理，包括输入数据的初始化、内存分配等；\texttt{kernel\_execution}部分启动并等待kernel的执行；\texttt{post\_process}包括kernel执行结束后的事务，如保存结果和释放内存。为使用ko-Sched，开发人员需实现并注册\texttt{pre\_process}, \texttt{post\_process}函数，ko-Sched会在在内核执行前后调用它们。此外，开发人员需要提供由\texttt{EXECUTE}标识的设备函数，ko-Sched将按照subkernel的划分策略以不同参数调用此函数。\autoref{code:koschedcode}展示了如何将\autoref{code:naivehostcudacode}, \autoref{code:naivedevicecudacode}中的程序改写为使用ko-Sched框架的内核可分割程序，包括函数\texttt{pre\_process}（\autoref{code:koschedcode:preprocessbeg}\textasciitilde\autoref{code:koschedcode:preprocessend}）, 由\texttt{EXECUTE}标识的内核函数（\autoref{code:koschedcode:kernelbeg}\textasciitilde\autoref{code:koschedcode:kernelend}）和\texttt{post\_process}（\autoref{code:koschedcode:postprocessbeg}\textasciitilde\autoref{code:koschedcode:postprocessend}）。\texttt{pre\_process}首先初始化输入数据（\autoref{code:koschedcode:initdata}），然后将数据从主机内存拷贝到设备内存（\autoref{code:koschedcode:cpy}），最后返回一个\texttt{KernelSetting}对象，包含了kernel的启动参数（\texttt{dimGrid}, \texttt{dimBlock}）、kernel的参数（\texttt{KernelArgs}对象）和\texttt{post\_process}需要的上下文信息（\texttt{Context}对象）（\autoref{code:koschedcode:kernelsettingbeg}\textasciitilde\autoref{code:koschedcode:kernelend}）。Ko-Sched启动子内核时将\texttt{pre\_process}返回的\texttt{KernelArgs}对象和原kernel中相应的\texttt{blockIdx}传递给子内核。在\texttt{kernel\_execution}部分，开发人员需要使用\texttt{EXECUTE}标识一个设备函数，ko-Sched将按照subkernel的划分策略以不同启动参数调用此函数。在\texttt{post\_process}部分，开发人员需要将结果从设备内存拷贝到主机内存，然后释放设备内存。
+为了能分析不同分割配置下的程序性能，CUDA开发人员需要编写可被灵活分割的内核。Ko-Sched将一个CUDA程序分为\texttt{pre\_process}, \texttt{kernel\_execution}和\texttt{post\_process} 3个部分。\texttt{pre\_process}包括启动kernel前的所有处理，包括输入数据的初始化、内存分配等；\texttt{kernel\_execution}部分启动并等待kernel的执行；\texttt{post\_process}包括kernel执行结束后的事务，如保存结果和释放内存。为使用ko-Sched，开发人员需实现并注册\texttt{pre\_process}, \texttt{post\_process}函数，ko-Sched会在在内核执行前后调用它们。此外，开发人员需要提供由\texttt{EXECUTE}标识的设备函数，ko-Sched将按照subkernel的划分策略以不同参数调用此函数。\autoref{code:koschedcode}展示了如何将\autoref{code:naivehostcudacode}, \autoref{code:naivedevicecudacode}中的程序改写为使用ko-Sched框架的内核可分割程序，包括函数\texttt{pre\_process}（\autoref{code:koschedcode:preprocessbeg}\textasciitilde\autoref{code:koschedcode:preprocessend}）, 由\texttt{EXECUTE}标识的内核函数（\autoref{code:koschedcode:kernelbeg}\textasciitilde\autoref{code:koschedcode:kernelend}）和\texttt{post\_process}（\autoref{code:koschedcode:postprocessbeg}\textasciitilde\autoref{code:koschedcode:postprocessend}）。\texttt{pre\_process}首先初始化输入数据（\autoref{code:koschedcode:initdata}），然后将数据从主机内存拷贝到设备内存（\autoref{code:koschedcode:cpy}），最后返回一个\texttt{KernelSetting}对象，包含了kernel的启动参数（\texttt{dimGrid}, \texttt{dimBlock}）、kernel的参数（\texttt{KernelArgs}对象）和\texttt{post\_process}需要的上下文信息（\texttt{Context}对象）（\autoref{code:koschedcode:kernelsettingbeg}\textasciitilde\autoref{code:koschedcode:kernelsettingend}）。Ko-Sched启动子内核时将\texttt{pre\_process}返回的\texttt{KernelArgs}对象和原kernel中相应的\texttt{blockIdx}传递给子内核。在\texttt{kernel\_execution}部分，开发人员需要使用\texttt{EXECUTE}标识一个设备函数，ko-Sched将按照subkernel的划分策略以不同启动参数调用此函数。在\texttt{post\_process}部分，开发人员需要将结果从设备内存拷贝到主机内存，然后释放设备内存。
 
 由于改变block的维度可能导致错误的计算，ko-Sched将保持开发人员设定的block维度。由于kernel分割改变了grid的维度，为使设备函数使用的\texttt{blockIdx}同内核未分割时一致，ko-Sched将自动计算每个block在原kernel中的索引并传值至设备函数，使得开发人员无需改变原有代码即可实现可变大小内核。
 
