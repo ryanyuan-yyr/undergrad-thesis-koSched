@@ -13,7 +13,7 @@ CUDA是英伟达公司开发的通用并行计算平台和编程模型，它可�
     \item 启动设备代码：设备代码是使用CUDA编写的代码，它会在设备上并行运行。内核是一组并行运行的线程，每个线程独立地执行设备代码的一部分。启动设备代码需要使用\texttt{<<<>>>}运算符和kernel函数名称。
     \item 将数据从设备内存复制回主机内存：在内核运行完毕后，将数据从设备内存复制回主机内存，从而主机可使用设备计算的结果。这可以通过使用CUDA库函数\texttt{cudaMemcpy()}实现。
     \item 释放设备内存：最后，程序需要在设备上释放使用的内存。这可以通过使用CUDA库函数\texttt{cudaFree()}实现。
-\end{enumerate*}。
+\end{enumerate*}
 
 这些操作被抽象为\emph{复制}和\emph{执行}命令，并被存储在GPU调度队列中，分别由\emph{CE}(copy engine)和\emph{EE}(execution engine)执行。当输入数据被复制至GPU显存后，CUDA编程模型以\emph{单指令多线程}（Single Intruction Multiple Threads，SIMT）的方式执行内核，多个线程对不同的数据执行同样的指令。同一个block中的线程在逻辑上被划分为若干大小为32的组，称为\emph{warp}，每个warp中的线程会并行执行同样的指令。Warp是GPU中最小调度单元。
 
@@ -105,6 +105,9 @@ CUDA为编程人员提供了并行执行复制和执行操作的方法，这是�
 \end{figure}
 
 \autoref{opt-cosched}展示了\texttt{vec\_add}和\texttt{matrix\_mul}在使用内核分割技术后并行执行的时间线。$t_0$时刻，这2个内核的所有子内核在2个stream中启动，进入stream对应的调度队列。之后，调度模块从队列中选择可执行的内核派发至执行单元。由于单个子内核block数目较少，在分配后GPU仍有剩余资源，调度模块可选择其他子内核同时执行。
+
+
+\input{chapters/motivation.tex}
 
 \section{相关工作}
 

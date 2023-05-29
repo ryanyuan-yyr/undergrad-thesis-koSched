@@ -5,6 +5,8 @@
 \section{实验环境}\label{exp-env}
 
 \begin{table}[htbp]
+    \caption{实验涉及的GPU硬件}
+    \label{table:exp-env}
     \begin{tblr}{
         colspec = {rX[c,m]X[c,m]X[c,m]X[c,m]},
         hlines,
@@ -23,8 +25,6 @@
         \emph{Host CPU}             & Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz   2.30 GHz & Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz & Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz & Intel(R) Xeon(R) Platinum 8350C CPU @ 2.60GHz \\
         \hline
     \end{tblr}
-    \caption{实验涉及的GPU硬件}
-    \label{table:exp-env}
 \end{table}
 
 本文的实验涉及到4种GPU硬件，如\autoref{table:exp-env}所示。此外，我们将CUDA Samples SDK\cite{cuda_samples}中选取的3个测试程序和cCUDA\cite{8853389}使用的\texttt{sqrt\_pow}内核改写为使用ko-Sched框架的内核可分割版本，分别是：

@@ -1,4 +1,4 @@
-\chapter{动机}\label{chap:motivation}
+\section{动机}\label{sec:motivation}
 
 尽管内核分割技术能带来显著的性能提升，实现这项技术的困难阻碍了开发人员广泛使用这一技术。
 
@@ -14,7 +14,10 @@
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\linewidth]{consistency/consistency.drawio.pdf}
-    \caption{不同分割参数下的性能。纵轴表示\texttt{vec\_add}的子内核大小（即所含block数目），横轴表示\texttt{matrix\_mul}的子内核大小，每个坐标对应的方格颜色表示在此分割参数的组合下的程序性能，颜色越深表示性能越高。}
+    \caption{不同分割参数下的性能。纵轴表示\texttt{vec\_add}的子内核大小（范围在2,176\textasciitilde 33,184 blocks），横轴表示\texttt{matrix\_mul}的子内核大小（范围在1,088\textasciitilde 16,592 blocks），每个坐标对应的方格颜色表示在此分割参数的组合下的程序性能，颜色越深表示性能越高。}
+    % configuring granularity of vec_add is 1024/128*68=544, the range in the diagram is 2176~33184
+    % configuring granularity of matrix_mul is 1024/256*68=272, the range in the diagram is 1088~16592
+
     \label{consistency}
 \end{figure}
 
