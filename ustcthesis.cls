@@ -1744,6 +1744,7 @@
 }
 \newcommand\ustc@date@format@zh@small[3]{\number#1 年 \number#2 月 \number#3 日}
 \newcommand\ustc@date@format@zh@big[3]{\zhdigits{#1}年\zhnumber{#2}月\zhnumber{#3}日}
+\newcommand\ustc@date@format@zh@big@short[3]{\zhdigits{#1}年\zhnumber{#2}月}
 \newcommand\ustc@date@month[1]{%
   \ifcase\number#1\or
     January\or February\or March\or April\or May\or June\or
@@ -1754,6 +1755,7 @@
 \newcommand\ustc@date@format@en[3]{\ustc@date@month{#2} \number#3, #1}
 \newcommand\ustc@date@zh@small{\ustc@format@date{\ustc@date@format@zh@small}{\ustc@date}}
 \newcommand\ustc@date@zh@big{\ustc@format@date{\ustc@date@format@zh@big}{\ustc@date}}
+\newcommand\ustc@date@zh@big@short{\ustc@format@date{\ustc@date@format@zh@big@short}{\ustc@date}}
 \newcommand\ustc@date@zh@short{\ustc@format@date{\ustc@date@format@zh@short}{\ustc@date}}
 \newcommand\ustc@date@en{\ustc@format@date{\ustc@date@format@en}{\ustc@date}}
 
@@ -2089,7 +2091,7 @@
           \textsf{企业导师：}              & \ustc@advisor@names    \\
             \cline{2-2}%
           \fi
-          \textsf{完成时间：}              & \ustc@date@zh@big      \\
+          \textsf{完成时间：}              & \ustc@date@zh@big@short      \\
           \cline{2-2}%
         \end{tabular}\par}%
   \end{titlepage}%
